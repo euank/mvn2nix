@@ -130,13 +130,21 @@ public class Maven2nix implements Callable<Integer> {
     }
 
     /**
-     * Check whether a given URL
+     * Check whether a given URL is valid. HTTP urls are checked to return '200' on HEAD, and file URIs are checked to
+     * exist on the filesystem. All other URIs are assumed to not exist.
      *
      * @param url The URL for the pom file.
      * @return
      */
     public static boolean doesUrlExist(URL url) {
         try {
+            String protocol = url.getProtocol();
+            if (url.getProtocol().equals("file")) {
+                File file = new File(url.getPath());
+                boolean isFile = file.isFile();
+                return isFile;
+            }
+
             URLConnection urlConnection = url.openConnection();
             if (!(urlConnection instanceof HttpURLConnection)) {
                 return false;
